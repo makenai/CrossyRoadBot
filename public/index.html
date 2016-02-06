@@ -7,6 +7,16 @@
   <title>Hello</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/6.0.13/css/bootstrap-slider.min.css">
+  <style type="text/css">
+    #imageOverlay {
+      outline: 1px solid green;
+    }
+    #imageOverlayWrap {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  </style>
 </head>
 <body>
 
@@ -24,36 +34,30 @@
 
   <div class="container">
     <div class="col-md-9">
-      <img id="outputImage" src="/output.jpg" />
+      <img id="originalImage" src="/original.jpg" />
     </div>
     <div class="col-md-3">
-      <form id="processOptions">
-        <div class="form-group">
-          <label for="image">Image</label>
-          <select id="image" name="image" class="form-control"></select>
-        </div>
-        <div class="form-group">
-          <label for="threshold1">Threshold 1</label>
-          <input type="text" id="threshold1" name="threshold1" class="slider" data-slider-value="20" data-slider-min="0" data-slider-max="300">
-        </div>
-        <div class="form-group">
-          <label for="threshold2">Threshold 2</label>
-          <input type="text" id="threshold2" name="threshold2" class="slider" data-slider-value="200" data-slider-min="0" data-slider-max="300">
-        </div>
-        <div class="checkbox">
-           <label>
-             <input type="checkbox" id="grayscale" name="grayscale"> Grayscale
-           </label>
-         </div>
-      </form>
     </div>
   </div>
 
   <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-storage-api/1.7.5/jquery.storageapi.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/6.0.13/bootstrap-slider.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.5.0/fabric.min.js"></script>
+  <script src="/js/screenSelector.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script>
+
+    var selector = new ScreenSelector( document.getElementById('originalImage') );
+    selector.on('update', function() {
+      var position = this.position();
+      $.localStorage.set('screenPosition', position);
+    });
+    var lastPosition = $.localStorage.get('screenPosition');
+    if ( lastPosition ) {
+      selector.setPosition( lastPosition );
+    }
 
     $('.slider').slider();
 
@@ -72,6 +76,7 @@
 
     socket.on('reload', function() {
       document.getElementById('outputImage').src = '/output.jpg?' + new Date().getTime();
+      document.getElementById('originalImage').src = '/original.jpg?' + new Date().getTime();
     });
 
     function requestImage() {
