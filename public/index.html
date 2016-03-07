@@ -33,57 +33,19 @@
   </nav>
 
   <div class="container">
-    <div class="col-md-9">
-      <img id="originalImage" src="/original.jpg" />
-    </div>
-    <div class="col-md-3">
-    </div>
+    <div id="application"></div>
   </div>
-
   <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-storage-api/1.7.5/jquery.storageapi.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/6.0.13/bootstrap-slider.min.js"></script>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.5.0/fabric.min.js"></script>
   <script src="/js/screenSelector.js"></script>
+  <script src="/js/main.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script>
-
-    var selector = new ScreenSelector( document.getElementById('originalImage') );
-    selector.on('update', function() {
-      var position = this.position();
-      $.localStorage.set('screenPosition', position);
-    });
-    var lastPosition = $.localStorage.get('screenPosition');
-    if ( lastPosition ) {
-      selector.setPosition( lastPosition );
-    }
-
-    $('.slider').slider();
-
     var socket = io();
-
-    $('#processOptions').on('change', function(e) {
-      requestImage();
-    });
-
-    socket.on('files', function(files) {
-      for (var i=0;i<files.length;i++) {
-        $('<option>' + files[i] + '</option>', { value: files[i] } ).appendTo('#image');
-      }
-      requestImage();
-    });
-
-    socket.on('reload', function() {
-      document.getElementById('outputImage').src = '/output.jpg?' + new Date().getTime();
-      document.getElementById('originalImage').src = '/original.jpg?' + new Date().getTime();
-    });
-
-    function requestImage() {
-      var values = $('#processOptions').serializeArray();
-      socket.emit('requestImage', values);
-    }
-
+    Crossy.mount( document.getElementById('application') );
   </script>
 </body>
 </html>

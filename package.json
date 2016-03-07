@@ -4,15 +4,26 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "gulp"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.13.4",
     "lodash": "^4.2.1",
-    "nodemon": "^1.8.1",
     "opencv": "^4.0.0",
     "socket.io": "^1.4.5"
+  },
+  "devDependencies": {
+    "babelify": "^7.2.0",
+    "browserify": "^13.0.0",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-nodemon": "^2.0.6",
+    "react": "^0.14.7",
+    "react-dom": "^0.14.7",
+    "reactify": "^1.1.1",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^3.7.0"
   }
 }

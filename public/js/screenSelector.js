@@ -13,6 +13,10 @@ ScreenSelector.prototype = {
     this.updatePosition();
   },
 
+  destroy: function() {
+    $(this.wrapper).remove();
+  },
+
   addCanvas: function() {
     this.canvasElement = document.createElement('canvas');
     this.wrapper = $('<div />', { id: 'imageOverlayWrap' });
@@ -25,12 +29,12 @@ ScreenSelector.prototype = {
 
   addControls: function() {
     this.handles = [
-      this.createDragHandle(10,10),
-      this.createDragHandle(10,100),
+      this.createDragHandle(10,10, 'green'),
+      this.createDragHandle(100,10),
       this.createDragHandle(100,100),
-      this.createDragHandle(100,10)
+      this.createDragHandle(10,100)
     ];
-    this.createLine( this.handles[0], this.handles[1] );
+    this.createLine( this.handles[0], this.handles[1], 'yellow' );
     this.createLine( this.handles[1], this.handles[2] );
     this.createLine( this.handles[2], this.handles[3] );
     this.createLine( this.handles[3], this.handles[0] );
@@ -41,7 +45,7 @@ ScreenSelector.prototype = {
     }.bind(this));
 
     this.canvas.on('mouse:up', function(e) {
-      this.emit('update');
+      this.emit('update', this.position());
     }.bind(this));
   },
 
@@ -60,12 +64,12 @@ ScreenSelector.prototype = {
     this.canvas.calcOffset();
   },
 
-  createLine: function (obj1, obj2) {
+  createLine: function (obj1, obj2, color) {
     var p1 = obj1.getCenterPoint();
     var p2 = obj2.getCenterPoint();
     var line = new fabric.Line([ p1.x, p1.y, p2.x, p2.y], {
-      fill: 'red',
-      stroke: 'red',
+      fill: color || 'red',
+      stroke: color || 'red',
       strokeWidth: 1,
       selectable: false
     });
@@ -75,10 +79,10 @@ ScreenSelector.prototype = {
     return line;
   },
 
-  createDragHandle: function (x,y) {
+  createDragHandle: function (x,y,color) {
     var handle = new fabric.Circle({
       radius: 5,
-      fill: '#f55',
+      fill: color || '#f55',
       hasControls: false,
       hasBorders: false
     });
@@ -93,10 +97,10 @@ ScreenSelector.prototype = {
     this.callbacks[ event ].push( callback );
   },
 
-  emit: function(event) {
+  emit: function(event, args) {
     if (this.callbacks[event]) {
       for (var i=0;i<this.callbacks[event].length;i++) {
-        this.callbacks[ event ][ i ].call( this );
+        this.callbacks[ event ][ i ].call( this, args );
       }
     }
   },
@@ -121,7 +125,7 @@ ScreenSelector.prototype = {
       if (position[i]) {
         var point = new fabric.Point( position[i][0], position[i][1] );
         this.handles[i].setPositionByOrigin( point, 'center', 'center' );
-        this.handles[i].setCoords();        
+        this.handles[i].setCoords();
         this.updateLines( this.handles[i] );
       }
     }

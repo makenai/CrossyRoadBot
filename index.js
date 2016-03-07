@@ -6,26 +6,47 @@ var cv = require('opencv');
 var fs = require('fs');
 var _ = require('lodash');
 
+var CFG = {
+  frameRate: 700
+};
+
 app.use(express.static('public'));
 
 io.on('connection', function(socket) {
 
-  // Send a file list of available images on connect
-  fs.readdir('./samples', function(err, files) {
-    socket.emit('files', files);
-  });
+  var camera = new cv.VideoCapture(0);
 
-  socket.on('requestCanny', function(values) {
-    var options = _.reduce(values, function(opts, pair) {
-      opts[ pair.name ] = pair.value;
-      return opts;
-    }, {});
-    processCanny(options, function() {
-      socket.emit('reload');
+  var cameraInterval = setInterval(function() {
+    camera.read(function(err, im) {
+      // MJPEG instead?
+      // http://stackoverflow.com/questions/25845219/c-opencv-streaming-camera-video-images-mjpeg-from-socket-into-browser-windo
+      im.saveAsync('./public/frame.jpg', function(error, ok) {
+        if (!error) {
+          socket.emit('gotRawFrame', {
+            filename: 'frame.jpg',
+            timestamp: new Date().getTime()
+          });
+          if (CFG.clientConfig) {
+            requestTransform(im, CFG.clientConfig, function(error, ok) {
+              socket.emit('gotFrame', {
+                filename: 'output.jpg',
+                timestamp: new Date().getTime()
+              });
+            });
+          }
+        }
+      });
     });
+  }, CFG.frameRate);
+
+  socket.on('configure', function(configuration) {
+    CFG.clientConfig = configuration;
+    console.log(configuration);
   });
 
   socket.on('disconnect', function(){
+    clearInterval( cameraInterval );
+    camera.close();
     console.log('disconnected');
   });
 
@@ -35,39 +56,17 @@ http.listen(3000, function() {
   console.log('Listening on http://localhost:3000')
 });
 
-var GREEN = [0, 255, 0]; // B, G, R
-var WHITE = [255, 255, 255]; // B, G, R
-var RED   = [0, 0, 255]; // B, G, R
+function requestTransform(originalImage, options, callback) {
+  console.log( options );
+  var image = originalImage.copy();
+  var corners = _.flatten( options.corners );
+  console.log( corners );
+  var newCorners = getCorners(options.screenWidth, options.screenHeight);
+  var matrix = image.getPerspectiveTransform( options.corners,  newCorners );
+  image.warpPerspective(matrix, options.screenWidth, options.screenHeight, [255, 255, 255]);
+  image.saveAsync('./public/output.jpg', callback);
+};
 
-function processCanny(options, callback) {
-  cv.readImage("./samples/" + options.image, function(err, image) {
-    var imgCanny = image.copy();
-    imgCanny.resize(800, 600);
-    var imgOriginal = imgCanny.copy();
-    if (options.grayscale) {
-      imgCanny.convertGrayscale();
-    }
-    if (options.bilateralFilter) {
-      imgCanny.bilateralFilter(options.diameter, options.sigmaColor, options.sigmaSpace);
-    }
-    if (options.canny) {
-      imgCanny.canny(options.threshold1, options.threshold2);
-    }
-    if (options.contours) {
-      var contours = imgCanny.findContours();
-      for(var i=0; i<contours.size(); i++) {
-        if(contours.area(i) > options.area) {
-          var moments = contours.moments(i);
-          var cgx = Math.round(moments.m10 / moments.m00);
-          var cgy = Math.round(moments.m01 / moments.m00);
-          imgOriginal.drawContour(contours, i, GREEN, 2);
-          imgOriginal.line([cgx - 5, cgy], [cgx + 5, cgy], RED, 2);
-          imgOriginal.line([cgx, cgy - 5], [cgx, cgy + 5], RED, 2);
-        }
-      }
-    }
-    imgOriginal.save('public/original.jpg');
-    imgCanny.save('public/output.jpg');
-    callback();
-  });
-}
+function getCorners(width,height) {
+  return [0,0, width,0, width,height, 0,height];
+};
