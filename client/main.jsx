@@ -9,18 +9,12 @@ var Crossy = React.createClass({
   },
 
   componentDidMount: function() {
-    socket.on('gotRawFrame', function(data) {
-      this.setState({ rawFrame: data });
-    }.bind(this));
-    socket.on('gotFrame', function(data) {
-      this.setState({ frame: data });
-    }.bind(this));
   },
 
 	render: function() {
 		return (
 			<div className="Crossy">
-        <PhoneView rawFrame={this.state.rawFrame} frame={this.state.frame} />
+        <PhoneView image="/processed.mjpeg" />
       </div>
 		);
 	}

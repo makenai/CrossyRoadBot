@@ -105,11 +105,26 @@ ScreenSelector.prototype = {
     }
   },
 
+  naturalScale: function(point) {
+    return [
+      Math.round(point[0] * (this.imageElement.naturalWidth / this.imageElement.width)),
+      Math.round(point[1] * (this.imageElement.naturalHeight / this.imageElement.height))
+    ];
+  },
+
+  visualScale: function(point) {
+    return [
+      Math.round(point[0] * (this.imageElement.width / this.imageElement.naturalWidth)),
+      Math.round(point[1] * (this.imageElement.height / this.imageElement.naturalHeight))
+    ];
+  },
+
   position: function() {
     var position = [];
     for (var i=0;i<this.handles.length;i++) {
       var point = this.handles[i].getCenterPoint();
-      position.push( [ point.x, point.y ] );
+      var natural = this.naturalScale([ point.x, point.y ]);
+      position.push( natural );
     }
     return position;
   },
@@ -123,12 +138,14 @@ ScreenSelector.prototype = {
   setPosition: function(position) {
     for (var i=0;i<this.handles.length;i++) {
       if (position[i]) {
-        var point = new fabric.Point( position[i][0], position[i][1] );
+        var visual = this.visualScale( position[i] );
+        var point = new fabric.Point( visual[0], visual[1] );
         this.handles[i].setPositionByOrigin( point, 'center', 'center' );
         this.handles[i].setCoords();
         this.updateLines( this.handles[i] );
       }
     }
+    this.emit('update', this.position());
     this.canvas.renderAll();
   }
 

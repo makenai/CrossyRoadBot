@@ -29,29 +29,22 @@ var PhoneView = React.createClass({
   },
 
   updateConfig: function(configuration) {
-      this.setState({
-        corners: configuration.corners,
-        screenWidth: configuration.width,
-        screenHeight: configuration.height
-      }, function() {
-        this.configureServer();
-      });
-      $.localStorage.set('corners', configuration.corners);
-      $.localStorage.set('screenWidth', configuration.width);
-      $.localStorage.set('screenHeight', configuration.height);
+    this.setState({
+      corners: configuration.corners,
+      screenWidth: configuration.width,
+      screenHeight: configuration.height
+    }, function() {
+      this.configureServer();
+    });
+    $.localStorage.set('corners', configuration.corners);
+    $.localStorage.set('screenWidth', configuration.width);
+    $.localStorage.set('screenHeight', configuration.height);
   },
 
-  getFilename: function() {
-    if (this.props.frame) {
-      return this.props.frame.filename + '?ts=' + this.props.frame.timestamp;
-    } else {
-      return '';
-    }
-  },
 
   render: function() {
     if (this.state.isConfiguring) {
-      return (<PhoneViewConfig frame={this.props.rawFrame}
+      return (<PhoneViewConfig
                 width={this.state.screenWidth}
                 height={this.state.screenHeight}
                 corners={this.state.corners}
@@ -59,9 +52,13 @@ var PhoneView = React.createClass({
                 onClose={this.closeConfig} />);
     } else {
       return (
-        <div>
-          <img src={this.getFilename()} className="img-responsive" />
-          <button onClick={this.showConfig}>Configure</button>
+        <div className="row">
+          <div className="col-md-4">
+            <img src="/processed.mjpeg" className="img-responsive" />
+          </div>
+          <div className="col-md-8">
+            <button className="btn" onClick={this.showConfig}>Configure</button>
+          </div>
         </div>
       );
     }

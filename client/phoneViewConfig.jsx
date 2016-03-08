@@ -10,32 +10,8 @@ var PhoneViewConfig = React.createClass({
     };
   },
 
-  componentDidMount: function() {
-    this.selector = new ScreenSelector( this.refs.rawFrame );
-    if (this.state.corners) {
-      this.selector.setPosition( this.state.corners );
-    } else {
-      this.onReset();
-    }
-    this.selector.on('update', function(position) {
-      this.setState({ corners: position });
-    }.bind(this));
-  },
-
   componentWillUnmount: function() {
     this.selector.destroy();
-  },
-
-  componentWillUpdate: function() {
-    this.selector.updatePosition();
-  },
-
-  getFilename: function() {
-    if (this.props.frame) {
-      return this.props.frame.filename + '?ts=' + this.props.frame.timestamp;
-    } else {
-      return '';
-    }
   },
 
   onSave: function(e) {
@@ -70,6 +46,18 @@ var PhoneViewConfig = React.createClass({
     this.setState({ width: e.target.value });
   },
 
+  imageLoad: function(e) {
+    this.selector = new ScreenSelector( this.refs.rawFrame );
+    if (this.state.corners) {
+      this.selector.setPosition( this.state.corners );
+    } else {
+      this.onReset();
+    }
+    this.selector.on('update', function(position) {
+      this.setState({ corners: position });
+    }.bind(this));
+  },
+
   render: function() {
     return (
       <div>
@@ -82,10 +70,10 @@ var PhoneViewConfig = React.createClass({
         </div>
         <div className="row">
           <div className="col-md-4">
-            <img ref="frame" src="" className="img-responsive" />
+            <img ref="frame" src="/processed.mjpeg" className="img-responsive" />
           </div>
           <div className="col-md-8">
-            <img ref="rawFrame" src={this.getFilename()} className="img-responsive" />
+            <img ref="rawFrame" src="/camera.mjpeg" onLoad={this.imageLoad} className="img-responsive" />
             <div className="form-inline">
               <button onClick={this.onReset} className="btn">Reset Bounds</button>
               {" "}
