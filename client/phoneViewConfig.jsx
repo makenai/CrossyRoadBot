@@ -14,8 +14,7 @@ var PhoneViewConfig = React.createClass({
     this.selector.destroy();
   },
 
-  onSave: function(e) {
-    e.preventDefault();
+  updateConfig: function() {
     if (this.props.onConfig) {
       this.props.onConfig({
         corners: this.state.corners,
@@ -23,6 +22,11 @@ var PhoneViewConfig = React.createClass({
         height: this.state.height
       });
     }
+  },
+
+  onSave: function(e) {
+    e.preventDefault();
+    this.updateConfig();
     this.onClose(e);
   },
 
@@ -39,11 +43,15 @@ var PhoneViewConfig = React.createClass({
   },
 
   changeHeight: function(e) {
-    this.setState({ height: e.target.value });
+    this.setState({ height: e.target.value }, function() {
+      this.updateConfig();
+    });
   },
 
   changeWidth: function(e) {
-    this.setState({ width: e.target.value });
+    this.setState({ width: e.target.value }, function() {
+      this.updateConfig();
+    });
   },
 
   imageLoad: function(e) {
@@ -54,7 +62,9 @@ var PhoneViewConfig = React.createClass({
       this.onReset();
     }
     this.selector.on('update', function(position) {
-      this.setState({ corners: position });
+      this.setState({ corners: position }, function() {
+        this.updateConfig();
+      });
     }.bind(this));
   },
 

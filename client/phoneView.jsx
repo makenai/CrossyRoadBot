@@ -41,6 +41,39 @@ var PhoneView = React.createClass({
     $.localStorage.set('screenHeight', configuration.height);
   },
 
+  naturalCoords: function(pageX,pageY) {
+    var screenImage = this.refs.screenImage;
+    var offset = $(screenImage).offset();
+    var x = pageX - offset.left;
+    var y = pageY - offset.top;
+    var naturalX = Math.round( x * (screenImage.naturalWidth / screenImage.width) );
+    var naturalY = Math.round( y * (screenImage.naturalHeight / screenImage.height) );
+    return [ naturalX, naturalY ];
+  },
+
+  mouseDown: function(e) {
+    this.coords = [];
+    this.setState({ drawing: true });
+  },
+
+  mouseMove: function(e) {
+    if (this.state.drawing) {
+      var coords = this.naturalCoords( e.pageX, e.pageY );
+      this.coords.push( coords );
+    }
+  },
+
+  mouseUp: function(e) {
+    if (this.state.drawing) {
+      if ( this.coords.length > 0 ) {
+        console.log( 'Drag', this.coords );
+      } else {
+        var coords = this.naturalCoords( e.pageX, e.pageY );
+        console.log( 'Tap', coords );
+      }
+      this.setState({ drawing: false });
+    }
+  },
 
   render: function() {
     if (this.state.isConfiguring) {
@@ -54,7 +87,11 @@ var PhoneView = React.createClass({
       return (
         <div className="row">
           <div className="col-md-4">
-            <img src="/processed.mjpeg" className="img-responsive" />
+            <img src="/processed.mjpeg" className="phoneViewImage img-responsive"
+              ref="screenImage"
+              onMouseDown={this.mouseDown}
+              onMouseMove={this.mouseMove}
+              onMouseUp={this.mouseUp} />
           </div>
           <div className="col-md-8">
             <button className="btn" onClick={this.showConfig}>Configure</button>
