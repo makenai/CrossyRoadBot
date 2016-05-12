@@ -13,6 +13,7 @@
     "express": "^4.13.4",
     "johnny-five": "^0.9.30",
     "lodash": "^4.2.1",
+    "machina": "^2.0.0-1",
     "opencv": "^4.0.0",
     "reload": "^0.7.0",
     "socket.io": "^1.4.5",

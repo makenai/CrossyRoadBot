@@ -9,12 +9,17 @@ var five = require('johnny-five');
 var fs = require('fs');
 var _ = require('lodash');
 var Deltabot = require('../j5-delta/index');
+var Device = require('./lib/device');
 var UVCControl = require('uvc-control');
+var vision = require('./lib/vision');
 
-var deltabot = null;
+var device = null;
 var camera = new cv.VideoCapture(0);
 var cameraControl = new UVCControl(0x046d, 0x082d);
 cameraControl.set('autoFocus', 0, function(error) {
+  if (error) console.log(error);
+});
+cameraControl.set('autoWhiteBalance', 0, function(error) {
   if (error) console.log(error);
 });
 
@@ -26,11 +31,12 @@ var cameraInterval = setInterval(function() {
     imageEvents.emit('rawImage', image);
     if (clientConfiguration) {
       requestTransform(image, clientConfiguration, function(newImage) {
+        // tagButtons( newImage );
         imageEvents.emit('processedImage', newImage);
       });
     }
   });
-}, 250);
+}, 1000);
 
 app.use(express.static('public'));
 app.get('/camera.mjpeg', mjpegStreamer(imageEvents, 'rawImage'));
@@ -39,8 +45,18 @@ app.get('/processed.mjpeg', mjpegStreamer(imageEvents, 'processedImage'));
 io.on('connection', function(socket) {
 
   socket.on('configure', function(configuration) {
-    if (!clientConfiguration || configuration.focus !== clientConfiguration.focus) {
+    if (!clientConfiguration
+        || configuration.focus !== clientConfiguration.focus
+        || configuration.whiteBalance !== clientConfiguration.whiteBalance
+        || configuration.brightness !== clientConfiguration.brightness
+      ) {
       cameraControl.set('absoluteFocus', configuration.focus, function(error) {
+        if (error) console.log(error);
+      });
+      cameraControl.set('whiteBalanceTemperature', configuration.whiteBalance, function(error) {
+        if (error) console.log(error);
+      });
+      cameraControl.set('brightness', configuration.brightness, function(error) {
         if (error) console.log(error);
       });
     }
@@ -54,25 +70,12 @@ io.on('connection', function(socket) {
   });
 
   socket.on('tap', function(coordinate) {
-    console.log('tap', coordinate);
-    // Upper Left: moveTo(32,-62,-155)
-    // Lower Right: moveTo(-38,53,-155)
-    var x = mapRange( coordinate[0], [ 0, 1040 ], [ 32, -38 ] );
-    var y = mapRange( coordinate[1], [ 0, 1920 ], [ -62, 53 ] );
-    console.log([ x, y ]);
-    delta.tap( x, y );
+    device.tap( coordinate[0], coordinate[1] );
   });
 
   socket.on('draw', function(coordinates) {
-    console.log('draw', coordinates);
-    var mapped = coordinates.map(function(coordinate) {
-      var x = mapRange( coordinate[0], [ 0, 1040 ], [ 32, -38 ] );
-      var y = mapRange( coordinate[1], [ 0, 1920 ], [ -62, 53 ] );
-      return [ x, y ];
-    });
-    delta.draw( mapped );
+    device.draw( coordinates );
   });
-
 
 });
 
@@ -83,16 +86,27 @@ var board = new five.Board({
 
 board.on("ready", function() {
   console.log('BOARD READY.');
-  delta = new Deltabot({
+  var delta = new Deltabot({
     board: board,
     type: 'tapster'
   });
+  device = new Device( delta );
 });
 
 http.listen(3000, function() {
   console.log('Listening on http://localhost:3000')
 });
 
+function tagButtons(image) {
+  var detected = vision.detectButtons(image);
+  detected.forEach(function(button) {
+    if (button.found) {
+      image.rectangle(button.position, button.button.size, button.button.color, 2);
+      image.putText( button.theshold.toString(), button.position[0], button.position[1], "HERSEY_PLAIN", [0,0,0], 1, 2);
+    }
+  });
+  return image;
+}
 
 function requestTransform(originalImage, options, callback) {
   var image = originalImage.copy();
@@ -105,8 +119,4 @@ function requestTransform(originalImage, options, callback) {
 
 function getCorners(width,height) {
   return [0,0, width,0, width,height, 0,height];
-};
-
-function mapRange(value, fromRange, toRange) {
-  return ( value - fromRange[0] ) * ( toRange[1] - toRange[0] ) / ( fromRange[1] - fromRange[0] ) + toRange[0];
 };

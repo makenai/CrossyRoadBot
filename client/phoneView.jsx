@@ -9,7 +9,9 @@ var PhoneView = React.createClass({
       corners: $.localStorage.get('corners'),
       screenWidth: $.localStorage.get('screenWidth') || 1080,
       screenHeight: $.localStorage.get('screenHeight') || 1920,
-      focus: $.localStorage.get('focus') || 0,
+      focus: $.localStorage.get('focus') || 32,
+      whiteBalance: $.localStorage.get('whiteBalance') || 3400,
+      brightness: $.localStorage.get('brightness') || 82
     };
   },
 
@@ -35,6 +37,8 @@ var PhoneView = React.createClass({
       screenWidth: configuration.width,
       screenHeight: configuration.height,
       focus: configuration.focus,
+      whiteBalance: configuration.whiteBalance,
+      brightness: configuration.brightness
     }, function() {
       this.configureServer();
     });
@@ -42,6 +46,8 @@ var PhoneView = React.createClass({
     $.localStorage.set('screenWidth', configuration.width);
     $.localStorage.set('screenHeight', configuration.height);
     $.localStorage.set('focus', configuration.focus);
+    $.localStorage.set('whiteBalance', configuration.whiteBalance);
+    $.localStorage.set('brightness', configuration.brightness);
   },
 
   naturalCoords: function(pageX,pageY) {
@@ -85,6 +91,8 @@ var PhoneView = React.createClass({
                 height={this.state.screenHeight}
                 corners={this.state.corners}
                 focus={this.state.focus}
+                whiteBalance={this.state.whiteBalance}
+                brightness={this.state.brightness}
                 onConfig={this.updateConfig}
                 onClose={this.closeConfig} />);
     } else {

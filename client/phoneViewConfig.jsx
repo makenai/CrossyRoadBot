@@ -7,7 +7,9 @@ var PhoneViewConfig = React.createClass({
       corners: this.props.corners,
       width: this.props.width,
       height: this.props.height,
-      focus: this.props.focus
+      focus: this.props.focus,
+      whiteBalance: this.props.whiteBalance,
+      brightness: this.props.brightness
     };
   },
 
@@ -21,7 +23,9 @@ var PhoneViewConfig = React.createClass({
         corners: this.state.corners,
         width: this.state.width,
         height: this.state.height,
-        focus: this.state.focus
+        focus: this.state.focus,
+        whiteBalance: this.state.whiteBalance,
+        brightness: this.state.brightness
       });
     }
   },
@@ -62,6 +66,18 @@ var PhoneViewConfig = React.createClass({
     });
   },
 
+  changeBrightness: function(e) {
+    this.setState({ brightness: e.target.value }, function() {
+      this.updateConfig();
+    });
+  },
+
+  changeWhiteBalance: function(e) {
+    this.setState({ whiteBalance: e.target.value }, function() {
+      this.updateConfig();
+    });
+  },
+
   imageLoad: function(e) {
     this.selector = new ScreenSelector( this.refs.rawFrame );
     if (this.state.corners) {
@@ -92,7 +108,7 @@ var PhoneViewConfig = React.createClass({
           </div>
           <div className="col-md-8">
             <img ref="rawFrame" src="/camera.mjpeg" onLoad={this.imageLoad} className="img-responsive" />
-            <div className="form-inline">
+            <div className="form">
               <button onClick={this.onReset} className="btn">Reset Selection</button>
               <br />
               <div className="form-group">
@@ -109,6 +125,18 @@ var PhoneViewConfig = React.createClass({
                 <input type="range" min="0" max="250" value={this.state.focus} onChange={this.changeFocus} name="focus" />
                 ({this.state.focus})
               </div>
+              <br />
+              <div className="form-group">
+                <label>White Balance:</label>
+                <input type="range" min="2000" max="6500" value={this.state.whiteBalance} onChange={this.changeWhiteBalance} name="whiteBalance" />
+                ({this.state.whiteBalance})
+              </div>
+              <br />
+                <div className="form-group">
+                  <label>Brightness:</label>
+                  <input type="range" min="0" max="255" value={this.state.brightness} onChange={this.changeBrightness} name="brightness" />
+                  ({this.state.brightness})
+                </div>
             </div>
           </div>
         </div>
