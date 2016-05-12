@@ -8,7 +8,8 @@ var PhoneView = React.createClass({
       isConfiguring: false,
       corners: $.localStorage.get('corners'),
       screenWidth: $.localStorage.get('screenWidth') || 1080,
-      screenHeight: $.localStorage.get('screenHeight') || 1920
+      screenHeight: $.localStorage.get('screenHeight') || 1920,
+      focus: $.localStorage.get('focus') || 0,
     };
   },
 
@@ -32,13 +33,15 @@ var PhoneView = React.createClass({
     this.setState({
       corners: configuration.corners,
       screenWidth: configuration.width,
-      screenHeight: configuration.height
+      screenHeight: configuration.height,
+      focus: configuration.focus,
     }, function() {
       this.configureServer();
     });
     $.localStorage.set('corners', configuration.corners);
     $.localStorage.set('screenWidth', configuration.width);
     $.localStorage.set('screenHeight', configuration.height);
+    $.localStorage.set('focus', configuration.focus);
   },
 
   naturalCoords: function(pageX,pageY) {
@@ -66,10 +69,10 @@ var PhoneView = React.createClass({
   mouseUp: function(e) {
     if (this.state.drawing) {
       if ( this.coords.length > 0 ) {
-        console.log( 'Drag', this.coords );
+        socket.emit('draw', this.coords);
       } else {
         var coords = this.naturalCoords( e.pageX, e.pageY );
-        console.log( 'Tap', coords );
+        socket.emit('tap', coords);
       }
       this.setState({ drawing: false });
     }
@@ -81,6 +84,7 @@ var PhoneView = React.createClass({
                 width={this.state.screenWidth}
                 height={this.state.screenHeight}
                 corners={this.state.corners}
+                focus={this.state.focus}
                 onConfig={this.updateConfig}
                 onClose={this.closeConfig} />);
     } else {

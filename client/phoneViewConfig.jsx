@@ -6,7 +6,8 @@ var PhoneViewConfig = React.createClass({
     return {
       corners: this.props.corners,
       width: this.props.width,
-      height: this.props.height
+      height: this.props.height,
+      focus: this.props.focus
     };
   },
 
@@ -19,7 +20,8 @@ var PhoneViewConfig = React.createClass({
       this.props.onConfig({
         corners: this.state.corners,
         width: this.state.width,
-        height: this.state.height
+        height: this.state.height,
+        focus: this.state.focus
       });
     }
   },
@@ -50,6 +52,12 @@ var PhoneViewConfig = React.createClass({
 
   changeWidth: function(e) {
     this.setState({ width: e.target.value }, function() {
+      this.updateConfig();
+    });
+  },
+
+  changeFocus: function(e) {
+    this.setState({ focus: e.target.value }, function() {
       this.updateConfig();
     });
   },
@@ -85,14 +93,21 @@ var PhoneViewConfig = React.createClass({
           <div className="col-md-8">
             <img ref="rawFrame" src="/camera.mjpeg" onLoad={this.imageLoad} className="img-responsive" />
             <div className="form-inline">
-              <button onClick={this.onReset} className="btn">Reset Bounds</button>
-              {" "}
+              <button onClick={this.onReset} className="btn">Reset Selection</button>
+              <br />
               <div className="form-group">
+                <label>Screen Dimensions:</label>
                 <input type="text" className="form-control" id="screenWidth" onChange={this.changeWidth}
-                  value={this.state.width} placeholder="width"/>
+                  value={this.state.width} placeholder="width" />
                 x
                 <input type="text" className="form-control" id="screenHeight" onChange={this.changeHeight}
                   value={this.state.height} placeholder="height"/>
+              </div>
+              <br />
+              <div className="form-group">
+                <label>Focus:</label>
+                <input type="range" min="0" max="250" value={this.state.focus} onChange={this.changeFocus} name="focus" />
+                ({this.state.focus})
               </div>
             </div>
           </div>
