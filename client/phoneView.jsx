@@ -11,7 +11,8 @@ var PhoneView = React.createClass({
       screenHeight: $.localStorage.get('screenHeight') || 1920,
       focus: $.localStorage.get('focus') || 32,
       whiteBalance: $.localStorage.get('whiteBalance') || 3400,
-      brightness: $.localStorage.get('brightness') || 82
+      brightness: $.localStorage.get('brightness') || 82,
+      transition: '...'
     };
   },
 
@@ -21,6 +22,12 @@ var PhoneView = React.createClass({
 
   componentWillMount: function() {
     this.configureServer();
+  },
+
+  componentDidMount: function() {
+    socket.on('transition', function(data) {
+      this.setState({ transition: JSON.stringify(data,null,2) });
+    }.bind(this));
   },
 
   showConfig: function() {
@@ -107,6 +114,7 @@ var PhoneView = React.createClass({
           </div>
           <div className="col-md-8">
             <button className="btn" onClick={this.showConfig}>Configure</button>
+            <pre>{this.state.transition}</pre>
           </div>
         </div>
       );

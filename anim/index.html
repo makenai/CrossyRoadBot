@@ -1,0 +1,49 @@
+<html>
+<head>
+  <script src="jquery.min.js"></script>
+</head>
+<body>
+  <style type="text/css">
+    #phone {
+      width: 400px;
+    }
+    #button {
+      position: absolute;
+      outline: 1px dashed #000000;
+      opacity: 0.75;
+      width: 40px;
+    }
+  </style>
+  <img id="phone" src="IMG_2345.PNG" />
+  <img id="button" src="play.png" />
+  <script>
+    var phonePos = $('#phone').position();
+    function animateRow(count) {
+      if (count > 0) {
+        var extent = 360 + phonePos.left;
+        var time = 1000;
+        if ( count == 1 ) {
+          extent = 185;
+          time = 500;
+        }
+        var pos = $('#button').position();
+        $('#button').css({ left: phonePos.left });
+        $('#button').animate({ top: pos.top + 5 }, 100, function() {
+          $('#button').animate({ left: extent }, time, null, function() {
+            animateRow( count - 1 );
+          });
+        });
+      } else {
+        $('#button').css({ outline: '2px solid #FFFF00' });
+      }
+    }
+    $('#button').css({ top: phonePos.top + 605, left: phonePos.left });
+    // $('#button').css({ top: 645, left: 185 });
+
+    $('#phone').on('click', function() {
+      animateRow(7);
+    });
+
+  </script>
+</body>
+</html>
