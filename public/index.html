@@ -4,9 +4,10 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Hello</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/6.0.13/css/bootstrap-slider.min.css">
+  <title>Crossy RoadBot</title>
+  <link rel="stylesheet" href="/vendor/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/vendor/bootstrap-3.3.7-dist/css/bootstrap-theme.min.css ">
+  <link rel="stylesheet" href="/vendor/bootstrap-slider/bootstrap-slider.min.css">
   <style type="text/css">
     #imageOverlay {
       outline: 1px solid green;
@@ -24,6 +25,24 @@
       -webkit-user-select: none;
       -ms-user-select: none;
       outline: 1px solid green;
+    }
+    #screenWidth, #screenHeight {
+      width: 100px;
+      display: inline-block;
+      margin: 0 10px;
+    }
+    input[type="range"] {
+      width: 500px;
+      display: inline-block;
+      margin: 0 10px;
+    }
+    label {
+      width: 100px;
+    }
+    #resetSelection {
+    }
+    #links {
+      font-size: 22px;
     }
   </style>
 </head>
@@ -44,11 +63,11 @@
   <div class="container">
     <div id="application"></div>
   </div>
-  <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-storage-api/1.7.5/jquery.storageapi.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/6.0.13/bootstrap-slider.min.js"></script>
-  <script src="http://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.5.0/fabric.min.js"></script>
+  <script src="/vendor/jquery-2.2.0.min.js"></script>
+  <script src="/vendor/jquery.storageapi.min.js"></script>
+  <script src="/vendor/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+  <script src="/vendor/bootstrap-slider/bootstrap-slider.min.js"></script>
+  <script src="/vendor/fabric.js-1.6.3/dist/fabric.min.js"></script>
   <script src="/js/screenSelector.js"></script>
   <script src="/js/main.js"></script>
   <script src="/socket.io/socket.io.js"></script>

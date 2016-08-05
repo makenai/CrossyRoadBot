@@ -9,7 +9,8 @@ var PhoneViewConfig = React.createClass({
       height: this.props.height,
       focus: this.props.focus,
       whiteBalance: this.props.whiteBalance,
-      brightness: this.props.brightness
+      brightness: this.props.brightness,
+      cameraNumber: this.props.cameraNumber
     };
   },
 
@@ -25,7 +26,8 @@ var PhoneViewConfig = React.createClass({
         height: this.state.height,
         focus: this.state.focus,
         whiteBalance: this.state.whiteBalance,
-        brightness: this.state.brightness
+        brightness: this.state.brightness,
+        cameraNumber: this.state.cameraNumber
       });
     }
   },
@@ -78,6 +80,12 @@ var PhoneViewConfig = React.createClass({
     });
   },
 
+  changeCameraNumber: function(e) {
+    this.setState({ cameraNumber: e.target.value }, function() {
+      this.updateConfig();
+    });
+  },
+
   imageLoad: function(e) {
     this.selector = new ScreenSelector( this.refs.rawFrame );
     if (this.state.corners) {
@@ -107,12 +115,18 @@ var PhoneViewConfig = React.createClass({
             <img ref="frame" src="/processed.mjpeg" className="img-responsive" />
           </div>
           <div className="col-md-8">
-            <img ref="rawFrame" src="/camera.mjpeg" onLoad={this.imageLoad} className="img-responsive" />
             <div className="form">
-              <button onClick={this.onReset} className="btn">Reset Selection</button>
+              <div className="panel panel-default">
+                <div className="panel-body">
+                  <img ref="rawFrame" src="/camera.mjpeg" onLoad={this.imageLoad} className="img-responsive" />
+                </div>
+                <div className="panel-footer">
+                  <button onClick={this.onReset} className="btn" id="resetSelection">Reset Selection</button>
+                </div>
+              </div>
               <br />
               <div className="form-group">
-                <label>Screen Dimensions:</label>
+                <label>Dimensions:</label>
                 <input type="text" className="form-control" id="screenWidth" onChange={this.changeWidth}
                   value={this.state.width} placeholder="width" />
                 x

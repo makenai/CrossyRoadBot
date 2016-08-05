@@ -16,7 +16,7 @@ var Machine = require('./lib/machine')
 
 var device = null;
 var machine = null;
-var camera = new cv.VideoCapture(1);
+var camera = new cv.VideoCapture( 0 );
 var cameraControl = new UVCControl(0x046d, 0x082d);
 cameraControl.set('autoFocus', 0, function(error) {
   if (error) console.log(error);
@@ -30,25 +30,28 @@ var clientConfiguration = null;
 var readyForNewFrame = true;
 
 var cameraInterval = setInterval(function() {
-  if (!readyForNewFrame) return;
+  if (!readyForNewFrame || !camera) return;
   readyForNewFrame = false;
   camera.read(function(err, image) {
     if (err) {
-      console.log(err);
+      console.log('ERR', err);
       readyForNewFrame = true;
       return;
     }
+
     imageEvents.emit('rawImage', image);
     if (clientConfiguration) {
       requestTransform(image, clientConfiguration, function(newImage) {
-        // var buttons = tagButtons( newImage );
-        // if (machine) {
-        //   buttons.forEach(function(button) {
-        //     if (button.found) {
-        //       machine.foundButton( button );
-        //     }
-        //   });
-        // }
+        var buttons = tagButtons( newImage );
+        if (clientConfiguration.isRunning)  {
+          if (machine) {
+            buttons.forEach(function(button) {
+              if (button.found) {
+                machine.foundButton( button );
+              }
+            });
+          }
+        }
         imageEvents.emit('processedImage', newImage);
         readyForNewFrame = true;
       });
@@ -71,7 +74,13 @@ io.on('connection', function(socket) {
         || configuration.focus !== clientConfiguration.focus
         || configuration.whiteBalance !== clientConfiguration.whiteBalance
         || configuration.brightness !== clientConfiguration.brightness
+        || configuration.cameraNumber !== clientConfiguration.cameraNumber
+        || configuration.screenWidth !== clientConfiguration.screenWidth
+        || configuration.screenHeight !== clientConfiguration.screenHeight
       ) {
+      if (device) {
+        device.setScreenSize( configuration.screenWidth, configuration.screenHeight );
+      }
       cameraControl.set('absoluteFocus', configuration.focus, function(error) {
         if (error) console.log(error);
       });
@@ -92,6 +101,7 @@ io.on('connection', function(socket) {
   });
 
   socket.on('tap', function(coordinate) {
+    console.log('raw coordinate', coordinate);
     device.tap( coordinate[0], coordinate[1] );
   });
 
@@ -110,9 +120,13 @@ board.on("ready", function() {
   console.log('BOARD READY.');
   var delta = new Deltabot({
     board: board,
-    type: 'tapster'
+    type: 'tapster',
+    pins: [ 9, 10, 11 ]
   });
   device = new Device( delta );
+  if (clientConfiguration) {
+    device.setScreenSize( clientConfiguration.screenWidth, clientConfiguration.screenHeight );
+  }
   machine = new Machine( device );
   machine.on('transition', function(data) {
     currentSocket.emit('transition', data);
